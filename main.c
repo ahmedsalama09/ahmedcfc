@@ -25,9 +25,12 @@ int main(void)
 
 	
 	/*REQ9 Example
+	while(1){
 	for(u8_stateloop=0;u8_stateloop<4;u8_stateloop++){
 	app_Ledstate(u8_stateloop);
 	delay_ms(1000);
+	}
+	u8_stateloop=0;
 	}
 	*/
 
