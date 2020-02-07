@@ -1,43 +1,53 @@
+#include <stdio.h>
+#include "linked_list.h"
+#include "stack.h"
+#include "queue.h"
 
-#include "registers.h"
-#include "SwICU.h"
-#include "led.h"
-#include "pushButton.h"
-#include "dcMotor.h"
-#include "HwPWM.h"
-
-#define moto_freq 100000
-
-int main(void)
+int main (void)
 {
-	uint8_t u8_swIcuDistance = 0;
-	uint8_t u8_dutyCycle = 8;
-	uint8_t u8_obstacle;
-	
-	MotorDC_Init(MOT_1);
-	MotorDC_Init(MOT_2);
-	MotorDC_Dir(MOT_1, FORWARD);
-	MotorDC_Dir(MOT_2, FORWARD);
-	
-	SwICU_Init(SwICU_EdgeRisiging);
+    int i,n=0;
+    queue_datatype op1,op2,ope;
+    queue q;
+    queue_init(&q,40);
+    char ar[] = "(75+90)";
+    for(i=0;i<11;i++){
+        if(ar[i] >=48 && ar[i] <= 57)
+            n = n*10+(ar[i]-48);
+        else if(ar[i] == '+' || ar[i] == '-' || ar[i] == '*' || ar[i] == '/' ){
+            in_queue(&q,n);
+            n=0;
+            in_queue(&q,ar[i]);
+        }
+        else if (n !=0){
+                in_queue(&q,n);
+                n=0;
+        }
 
+    }
 
-	HwPWMInit();
-	HwPWMSetDuty(u8_dutyCycle, moto_freq);
+    de_queue(&q,&op1);
 
-	while(1)
-	{
-		timer2DelayMs(300);
-		/*read the obstacle measures*/
-		u8_obstacle = ultrasonic_read();
-		
-		if(u8_obstacle > 5){
-			MotorDC_Dir(MOT_1, STOP);
-			MotorDC_Dir(MOT_2, STOP);
-		}else
-		{
-			MotorDC_Dir(MOT_1, FORWARD);
-			MotorDC_Dir(MOT_2, FORWARD);
-		}
-	}
+    while(!queue_empty(&q)){
+        de_queue(&q,&ope);
+        de_queue(&q,&op2);
+
+        switch(ope){
+        case '+':
+            op1 = op2+op1;
+
+            break;
+        case '-':
+            op1 = op1-op2;
+            break;
+        case '*':
+            op1 = op1*op2;
+            break;
+        case '/':
+            op1 = op1/op2;
+            break;
+        }
+    }
+    printf("%d",op1);
+    return 0;
 }
+
