@@ -1,0 +1,87 @@
+***************************TEAM 2 TESTING TOOLS**********************
+
+Units to be tested : DIO, PWM
+
+Test 1 : DIO
+
+Functions to be tested:
+	
+1- DIO Init : input : GPIO , PINNUM, VALUE
+
+testing scenario 1 
+	Inputs : Values within Expected Range
+	expected Output : E-oK
+	Our Output	: E-ok
+	TEST PASSED
+
+Testing scenario 2
+	Inputs: Wrong pin number
+	expected output : E-NOK
+	our output	:E-Ok 
+	TEST FAILED
+
+Testing scenario 3
+	Inputs : wrong gpio value
+	Expected Output : E-Ok
+	out output	:E-OK
+	TEST PASSED
+
+2-DIO Write: Input : GPIO,PINNUM,value
+
+testing scenario 1 
+	Inputs : Values within Expected Range
+	expected Output : E-oK
+	Our Output	: E-ok
+	TEST PASSED
+
+Testing scenario 2
+	Inputs: Wrong Value
+	expected output : E-NOK
+	our output	:E-NOk 
+	TEST PASSED
+
+Testing scenario 3
+	Inputs : wrong gpio value
+	Expected Output : E-NOk
+	out output	:E-NOK
+	TEST PASSED
+
+3-DIO Read : Inputs : GPIO,PINNUM,OUTPUT POINTER
+
+testing scenario 1 
+	Inputs : Values within Expected Range
+	expected Output : E-oK
+	Our Output	: E-ok
+	TEST PASSED
+
+Testing scenario 2
+	Inputs: NULL POINTER
+	expected output : E-NOK
+	our output	:E-NOk 
+	TEST PASSED
+
+Testing scenario 3
+	Inputs : wrong gpio value
+	Expected Output : E-NOk
+	out output	:E-NOK
+	TEST PASSED
+
+4-DiO Toggle : Inputs : GPIO,PINNUM
+
+testing scenario 1 
+	Inputs : Values within Expected Range
+	expected Output : E-oK
+	Our Output	: E-ok
+	TEST PASSED
+
+Testing scenario 2
+	Inputs: wrong pin num
+	expected output : E-NOK
+	our output	:E-Ok 
+	TEST FAILED
+
+Testing scenario 3
+	Inputs : wrong gpio value
+	Expected Output : E-NOk
+	out output	:E-NOK
+	TEST PASSED
