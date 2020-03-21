@@ -3,8 +3,13 @@
  *
  * Created: 20-Jan-20 4:57:25 PM
  *  Author: ahmed
+<<<<<<< HEAD
  *
  */
+=======
+ *Blo2 Blo2
+ */ 
+>>>>>>> ad_branch
 #include "timers.h"
 
 static En_timer2perscaler_t T2_PSC_READ;
