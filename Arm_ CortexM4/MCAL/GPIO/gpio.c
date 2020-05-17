@@ -128,10 +128,10 @@ ERROR_STATUS gpio_Write(uint8_t Port , uint16_t Pins, uint16_t Val)
     {
     	/*Write Your Value*/
     	  /*First Reinit all pins*/
-    	 Port_Adrress->BSRR = (Pins << BSRRL_BITS_OFFSET);
+    	  Port_Adrress->BSRRH = Pins;
 
     	  /*Write Your Val*/
-    	  Port_Adrress->BSRR = Pins & Val;
+    	  Port_Adrress->BSRRL = Pins & Val;
     }
 
     /*Return*/

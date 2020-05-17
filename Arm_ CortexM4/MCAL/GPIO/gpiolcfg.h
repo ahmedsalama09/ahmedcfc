@@ -5,9 +5,9 @@
 #define GPIOLCFG_H
 
 
-#include "PerRegs.h"
+#include <MCAL/PerRegs.h>
 //#include "stm32f4xx.h"
-#define PINS_NUM 2
+#define PINS_NUM (4)
 
 /*Define input Parameters*/
 #define IO_INPUT (0)

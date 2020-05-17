@@ -5,8 +5,8 @@
 #define GPIO_H
 
 /*Includes*/
-#include "Error_table.h"
-#include "std_types.h"
+#include <SERVICES/Error_table.h>
+#include <SERVICES/std_types.h>
 
 /*Defines*/
 /*Ports Defines*/

@@ -5,8 +5,8 @@
 #define CLOCK_H
 #ifdef  CLOCK_H
 
-#include "../Error_table.h"
-#include "../std_types.h"
+#include "./SERVICES/Error_table.h"
+#include "./SERVICES/std_types.h"
 
 /*ClockInit
 *Description : function that inits clock with desired frequency
