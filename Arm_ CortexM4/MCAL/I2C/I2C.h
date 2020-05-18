@@ -22,12 +22,41 @@
 #define SLAVE_SEND (0U)
 #define SLAVE_REC (1U)
 
+
+/*I2C Init
+ * Description : Function to init I2C from an array of struct named
+ * I2Clcfg.c "Linked"
+ * Input : Void , Output : Void
+ */
 void I2C_Link_Init(void);
 
+/*Fnction to send or receive data in Slave mode thru polling
+ * Input : pointer to data , number of byte ,
+ * *I2C module num , Send or receive command
+ * Output : Error " E_OK if no error"
+ * *"Module not init if i2c wasn't initalized" , "Null pointer for null ptr to data"
+ */
 ERROR_STATUS I2C_Master(uint8_t *PtrData , uint8_t SlaveADDR ,uint16_t DataLength
 		, uint8_t I2C_ID , uint8_t Mast_State);
 
+/*Fnction to send or receive data in master mode thru isr
+ * Input : pointer to data , slave address , number of byte ,
+ * *I2C module num , Send or receive command
+ * Output : Error " E_OK if no error"
+ * *"Module not init if i2c wasn't initalized" , "Null pointer for null ptr to data"
+ */
+ERROR_STATUS I2C_Master_IRQ(uint8_t *PtrData , uint8_t SlaveADDR ,uint16_t DataLength
+		, uint8_t I2C_ID , uint8_t Mast_State);
+
+/*Fnction to send or receive data in Slave mode thru polling
+ * Input : pointer to data , number of byte ,
+ * *I2C module num , Send or receive command
+ * Output : Error " E_OK if no error"
+ * *"Module not init if i2c wasn't initalized" , "Null pointer for null ptr to data"
+ */
 ERROR_STATUS I2C_Slave(uint8_t *PtrData, uint16_t DataLength, uint8_t I2C_ID, uint8_t Slave_State);
+
+
 void I2C1_EV_IRQHandler(void);
 void I2C1_ER_IRQHandler(void);
 

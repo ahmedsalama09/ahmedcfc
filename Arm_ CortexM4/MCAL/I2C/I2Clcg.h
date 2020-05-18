@@ -85,6 +85,7 @@ typedef struct
 	/*CR2 Configs*/
 	uint8_t Err_IRQ_State; //disable or enable Error irq
 	uint8_t Eve_IRQ_State; //disable or enable event irq
+	uint8_t Buf_IRQ_State;
 
 	/*OAR1 Configs*/
 	uint8_t Addr_Mode:1; //10bit or 7bit
