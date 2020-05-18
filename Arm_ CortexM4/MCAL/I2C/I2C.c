@@ -42,6 +42,7 @@
 #define FREQ_SHIFT (0u)
 #define INT_ERR_SHIFT (8u)
 #define INT_EVE_SHIFT (9u)
+#define INT_BUF_SHIFT (10u)
 
 #define INT_BUF_MASK (0x0400u)
 
@@ -69,8 +70,8 @@
 
 /*SR1 Macros*/
 #define TRANSMIT_EMPTY_MASK (0x0080u)
-
 #define RECEIVE_EMPTY_MASK (0x0040u)
+#define BYTE_TRANSFER_MASK (0x0004u)
 
 #define ACK_FAILURE (1U)
 #define ACK_FAILURE_SHIFT (10U)
@@ -89,6 +90,9 @@
 #define WRITE_BIT (0x00u)
 #define ADDR_SHIFT (1u)
 
+/*Data Macros*/
+#define TRANSMIT_FREE (0u)
+#define TRANSMIT_ONGOING (1u)
 
 /************GLOBALS************/
 /*Global Var To save init state*/
@@ -96,6 +100,8 @@ static uint8_t gu8_Init_state = I2C_NOT_INIT;
 volatile static uint8_t gu8_Slave_Addr_IRQ = 0;
 volatile static uint8_t *gPtrDataIRQ = 0;
 volatile static uint16_t gu16_DataLengthIRQ = 0;
+
+volatile static uint8_t gu8_DataProcessing = TRANSMIT_FREE;
 
 /*I2C Init
  * Description : Function to init I2C from an array of struct named
@@ -146,6 +152,9 @@ void I2C_Link_Init(void)
 
 			/*ERR Int*/
 			PtrI2C->CR2 |= (I2C_STRUCT.Err_IRQ_State << INT_ERR_SHIFT);
+
+			/*Buf INT*/
+			PtrI2C->CR2 |= (I2C_STRUCT.Buf_IRQ_State << INT_BUF_SHIFT);
 
 			/*EvE Int*/
 			PtrI2C->CR2 |= (I2C_STRUCT.Eve_IRQ_State << INT_EVE_SHIFT);
@@ -232,6 +241,12 @@ static void Rec_Data(uint8_t *PtrData , uint16_t DataLength , str_I2C_t *I2C)
 	}
 }
 
+/*Fnction to send or receive data in master mode thru polling
+ * Input : pointer to data , slave address , number of byte ,
+ * *I2C module num , Send or receive command
+ * Output : Error " E_OK if no error"
+ * *"Module not init if i2c wasn't initalized" , "Null pointer for null ptr to data"
+ */
 ERROR_STATUS I2C_Master(uint8_t *PtrData , uint8_t SlaveADDR ,uint16_t DataLength
 		, uint8_t I2C_ID , uint8_t Mast_State)
 {
@@ -304,6 +319,12 @@ ERROR_STATUS I2C_Master(uint8_t *PtrData , uint8_t SlaveADDR ,uint16_t DataLengt
 	return ERR;
 }
 
+/*Fnction to send or receive data in Slave mode thru polling
+ * Input : pointer to data , number of byte ,
+ * *I2C module num , Send or receive command
+ * Output : Error " E_OK if no error"
+ * *"Module not init if i2c wasn't initalized" , "Null pointer for null ptr to data"
+ */
 ERROR_STATUS I2C_Slave(uint8_t *PtrData, uint16_t DataLength, uint8_t I2C_ID, uint8_t Slave_State)
 {
 	/*Create Error Flag*/
@@ -351,6 +372,12 @@ ERROR_STATUS I2C_Slave(uint8_t *PtrData, uint16_t DataLength, uint8_t I2C_ID, ui
 	return ERR;
 }
 
+/*Fnction to send or receive data in master mode thru isr
+ * Input : pointer to data , slave address , number of byte ,
+ * *I2C module num , Send or receive command
+ * Output : Error " E_OK if no error"
+ * *"Module not init if i2c wasn't initalized" , "Null pointer for null ptr to data"
+ */
 ERROR_STATUS I2C_Master_IRQ(uint8_t *PtrData , uint8_t SlaveADDR ,uint16_t DataLength
 		, uint8_t I2C_ID , uint8_t Mast_State)
 {
@@ -379,7 +406,7 @@ ERROR_STATUS I2C_Master_IRQ(uint8_t *PtrData , uint8_t SlaveADDR ,uint16_t DataL
 			gu16_DataLengthIRQ = DataLength;
 
 			/*Check For busy state of bus*/
-			if((I2C->SR2) & BUSY_MASK)
+			if( ((I2C->SR2) & BUSY_MASK) || gu8_DataProcessing == TRANSMIT_ONGOING)
 			{
 				ERR = ERROR_I2C_BASE + ERROR_BUS_BUSY;
 			}
@@ -428,6 +455,9 @@ void I2C1_EV_IRQHandler(void)
 	{
 		/*Send Slave ADDR*/
 		I2C1->DR = gu8_Slave_Addr_IRQ;
+
+		/*Lock any transmit request*/
+		gu8_DataProcessing = TRANSMIT_ONGOING;
 	}
 
 	else if((I2C1->SR1 & ADDRESS_MATCHED_MASK) == ADDRESS_MATCHED_MASK)
@@ -435,8 +465,6 @@ void I2C1_EV_IRQHandler(void)
 		/*Read SR2 To clr Flag*/
 		I2C1->SR2;
 
-		/*Enable Buf IRQ*/
-		I2C1->CR2 |= INT_BUF_MASK;
 	}
 	else if((I2C1->SR1 & TRANSMIT_EMPTY_MASK) == TRANSMIT_EMPTY_MASK)
 	{
@@ -452,26 +480,32 @@ void I2C1_EV_IRQHandler(void)
 			/*Disable buf irq and reset cnt*/
 			au16_loop =0;
 
-			/*Disable Buf INT*/
-			I2C1->CR2 &= ~INT_BUF_MASK;
+			gu8_DataProcessing = TRANSMIT_FREE;
 		}
 	}
-	else if((I2C1->SR1 & TRANSMIT_EMPTY_MASK) == TRANSMIT_EMPTY_MASK)
-		{
+
+	else if((I2C1->SR1 & RECEIVE_EMPTY_MASK) == RECEIVE_EMPTY_MASK)
+	{
 		/*Send data byte by byte*/
-				if(au16_loop < gu16_DataLengthIRQ)
-				{
-					 gPtrDataIRQ[au16_loop] =I2C1->DR ;
+		if(au16_loop < gu16_DataLengthIRQ)
+		{
+			gPtrDataIRQ[au16_loop] =I2C1->DR ;
 
-					au16_loop++;
-				}
-				else
-				{
-					/*Disable buf irq and reset cnt*/
-					au16_loop =0;
-
-					/*Disable Buf INT*/
-					I2C1->CR2 &= ~INT_BUF_MASK;
-				}
+			au16_loop++;
 		}
+		else
+		{
+			/*Disable buf irq and reset cnt*/
+			au16_loop =0;
+
+			gu8_DataProcessing = TRANSMIT_FREE;
+		}
+	}
+	else
+	{
+		/*Reset cnt and unlock buffer*/
+		au16_loop = 0;
+
+		gu8_DataProcessing = TRANSMIT_FREE;
+	}
 }

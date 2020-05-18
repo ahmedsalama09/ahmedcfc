@@ -14,6 +14,7 @@ str_I2Ccfg_t arr_I2C_Cfg[I2C_MODULES_NUM] = {{.I2C_ID = I2C_1 ,
 											.PacketErr = PACKET_ERROR_EN ,
 											.Pos = POS_1ST_BYTE ,
 											.Err_IRQ_State = ERR_INT_EN ,
+											.Buf_IRQ_State = BUF_INT_EN,
 											.Eve_IRQ_State = EVE_INT_EN,
 											.Addr_Mode = ADDRESS_MODE_7 ,
 										#ifdef SLAVE_ADDR
